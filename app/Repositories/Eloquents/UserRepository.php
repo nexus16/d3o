@@ -16,4 +16,14 @@ class UserRepository extends EloquentRepository implements UserRepositoryInterfa
     {
         return User::class;
     }
+    /**
+     * get list user in project
+     */
+    public function getListUserInProject($projectId)
+    {
+    	return User::rightJoin('project_member', 'users.id', '=', 'project_member.user_id')
+    		->leftJoin('projects', 'projects.id', '=', 'project_member.project_id')
+    		->select('users.*')
+    		->where('project_member.project_id', $projectId);
+    }
 }

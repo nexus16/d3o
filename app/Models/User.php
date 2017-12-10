@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Config;
 
 class User extends Authenticatable
 {
@@ -41,4 +42,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function isLeader()
+    {
+      return $this->role == Config::get('constants.role.leader');
+    }
 }

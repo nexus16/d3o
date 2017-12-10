@@ -11,6 +11,7 @@ class Project extends Model
   protected $table = 'projects';
   protected $dates = ['deleted_at'];
   protected $fillable = [
+      'name',
       'manager_id',
       'customer_id',
       'start_date',

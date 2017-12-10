@@ -4,17 +4,104 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Repositories\Contracts\ProjectRepositoryInterface;
-
+use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Contracts\ProjectMemberRepositoryInterface;
+use App\Http\Requests\CheckCreateProject;
+use Gate;
+use Auth;
+use DB;
+use App\Models\Project;
 
 class ProjectController extends Controller
 {
   public $projectRepository;
-  public function __construct(ProjectRepositoryInterface $projectRepository)
+  public $userRepository;
+  public $projectMemberRepository;
+
+  public function __construct(
+  	ProjectRepositoryInterface $projectRepository,
+  	UserRepositoryInterface $userRepository,
+  	ProjectMemberRepositoryInterface $projectMemberRepository
+  )
   {
   	$this->projectRepository = $projectRepository;
+  	$this->userRepository = $userRepository;
+  	$this->projectMemberRepository = $projectMemberRepository;
   }
-  public function listProjects()
+  /**
+   * show list project
+   */
+  public function index(Request $request)
   {
-  	return $this->projectRepository->getAll();
+  	if (Auth::user()->isLeader())
+  		return $this->projectRepository->getAll();
+  	else 
+  		return $this->projectRepository->getParticipationProjects(Auth::id())->get();
+  }
+  /**
+   * view info project
+   */
+  public function view($id)
+  {
+  	$project = $this->projectRepository->find($id);
+  	$this->authorize($project);
+  	$lisrUsers = $this->userRepository->getListUserInProject($id)->get();
+  	$projectInfo = $this->projectRepository->getInfo($id);
+  	return [$lisrUsers, $projectInfo];
+  }
+  /**
+   * create new project
+   */
+  public function showFormCreate()
+  {
+  	if (Auth::user()->isLeader())
+  		return view('projects.new');
+  	else 
+  		abort(404);
+  }
+  /**
+   * save new project
+   */
+  public function create(CheckCreateProject $request)
+  {
+  	$listMember = $request->input('member');
+  	try {
+      DB::beginTransaction();
+        $project = $this->projectRepository->create($request->all());
+        foreach ($listMember as $member) {
+      		$this->projectMemberRepository->create(['project_id'=>$project->id, 'user_id'=>$member]);
+      	}
+      DB::commit();
+    } catch (Exception $e) {
+      DB::rollBack();
+      return redirect()->back();
+    }
+    return redirect()->route('projects');
+  }
+  /**
+   * show edit project
+   */
+  public function showFormEdit($id)
+  {
+  	$project = $this->projectRepository->find($id);
+  	$this->authorize('update', $project);
+  	return view('projects.edit', compact('project'));
+  }
+  /**
+   * update project
+   */
+  public function update(CheckCreateProject $request, $projectId)
+  {
+  	$project = $this->projectRepository->find($projectId);
+  	$this->authorize($project);
+  	try {
+        DB::beginTransaction();
+           	$this->projectRepository->update($projectId, $request->all());
+        DB::commit();
+    } catch (Exception $e) {
+        DB::rollBack();
+        return redirect()->back();
+    }
+    return redirect()->route('projects');
   }
 }

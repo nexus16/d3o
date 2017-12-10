@@ -19,7 +19,17 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/users', 'UserController@listUsers')->name('users');
-Route::get('/projects', 'ProjectController@listProjects')->name('projects');
+Route::prefix('projects')->group(function () {
+	Route::get('/', 'ProjectController@index')->name('projects');
+	Route::get('/new', 'ProjectController@showFormCreate')->name('projects.create');
+	Route::post('/new', 'ProjectController@create')->name('projects.store');
+	Route::get('/{id}', 'ProjectController@view')->name('projects.view');
+	Route::get('/{id}/edit', 'ProjectController@showFormEdit')->name('projects.edit');
+	Route::post('/{id}', 'ProjectController@update')->name('projects.update');
+
+});
+Route::resource('customers', 'CustomerController');
 Route::get('/customers', 'CustomerController@listCustomers')->name('customers');
+Route::get('404', function(){return view('404');});
 
 
