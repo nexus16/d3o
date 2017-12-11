@@ -17,6 +17,22 @@ class ProjectRepository extends EloquentRepository implements ProjectRepositoryI
         return Project::class;
     }
     /**
+     * get list project for leader
+     */
+    public function getAll()
+    {
+        return Project::leftJoin('users', 'users.id', '=', 'projects.manager_id')
+            ->leftJoin('customers', 'customers.id', '=', 'projects.customer_id')
+            ->select(
+                'projects.*',
+                'users.id as manager_id',
+                'users.name as manager_name',
+                'customers.id as customer_id',
+                'customers.name as customer_name'
+            )
+            ->get();
+    }
+    /**
      * get list project participation
      */
     public function getParticipationProjects($userId)
@@ -40,7 +56,7 @@ class ProjectRepository extends EloquentRepository implements ProjectRepositoryI
     			'customers.name as customer_name'
     		)
     		->where('projects.id', $projectId)
-    		->get();
+    		->first();
     }
 
 }

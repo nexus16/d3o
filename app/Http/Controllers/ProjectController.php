@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\Contracts\ProjectRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\Contracts\ProjectMemberRepositoryInterface;
 use App\Http\Requests\CheckCreateProject;
 use Gate;
@@ -17,16 +18,19 @@ class ProjectController extends Controller
   public $projectRepository;
   public $userRepository;
   public $projectMemberRepository;
+  public $customerRepository;
 
   public function __construct(
   	ProjectRepositoryInterface $projectRepository,
   	UserRepositoryInterface $userRepository,
-  	ProjectMemberRepositoryInterface $projectMemberRepository
+  	ProjectMemberRepositoryInterface $projectMemberRepository,
+    CustomerRepositoryInterface $customerRepository
   )
   {
   	$this->projectRepository = $projectRepository;
   	$this->userRepository = $userRepository;
   	$this->projectMemberRepository = $projectMemberRepository;
+    $this->customerRepository = $customerRepository;
   }
   /**
    * show list project
@@ -34,9 +38,11 @@ class ProjectController extends Controller
   public function index(Request $request)
   {
   	if (Auth::user()->isLeader())
-  		return $this->projectRepository->getAll();
+  		$listProjects =  $this->projectRepository->getAll();
   	else 
-  		return $this->projectRepository->getParticipationProjects(Auth::id())->get();
+  		$listProjects = $this->projectRepository->getParticipationProjects(Auth::id())->get();
+    return view('projects.index', compact('listProjects'));
+
   }
   /**
    * view info project
@@ -45,17 +51,19 @@ class ProjectController extends Controller
   {
   	$project = $this->projectRepository->find($id);
   	$this->authorize($project);
-  	$lisrUsers = $this->userRepository->getListUserInProject($id)->get();
+  	$listUsers = $this->userRepository->getListUserInProject($id)->get();
   	$projectInfo = $this->projectRepository->getInfo($id);
-  	return [$lisrUsers, $projectInfo];
+    return view('projects.show', compact('listUsers', 'projectInfo'));
   }
   /**
    * create new project
    */
   public function showFormCreate()
   {
+    $listUsers = $this->userRepository->getAll();
+    $listCustomers = $this->customerRepository->getAll();
   	if (Auth::user()->isLeader())
-  		return view('projects.new');
+  		return view('projects.new', compact('listUsers', 'listCustomers'));
   	else 
   		abort(404);
   }
