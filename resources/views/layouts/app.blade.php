@@ -92,6 +92,11 @@
           </a>
         </li>
         <li>
+          <a href="{{route('timesheets.create')}}">
+            <i class="fa fa-th"></i> <span>Timesheets</span>
+          </a>
+        </li>
+        <li>
           <a href="#">
             <i class="fa fa-group"></i>
             <span>Member</span>
@@ -139,5 +144,6 @@
     <!-- AdminLTE App -->
     <script src="{{asset('js/adminlte.min.js')}}"></script>
     {{-- <script src="{{ asset('js/app.js') }}"></script> --}}
+    @yield('script')
 </body>
 </html>

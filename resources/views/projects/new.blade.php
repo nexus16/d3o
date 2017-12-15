@@ -11,7 +11,7 @@
 </form> --}}
 
 
-<form action="{{route('projects.create')}}" method="POST" class="form-horizontal">
+<form action="{{route('projects.store')}}" method="POST" class="form-horizontal">
 	{{csrf_field()}}
   <div class="box-body">
     <div class="form-group">

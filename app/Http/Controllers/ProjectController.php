@@ -72,6 +72,7 @@ class ProjectController extends Controller
    */
   public function create(CheckCreateProject $request)
   {
+    dd($request->all());
   	$listMember = $request->input('member');
   	try {
       DB::beginTransaction();
