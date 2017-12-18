@@ -91,10 +91,17 @@
             <i class="fa fa-th"></i> <span>Projects</span>
           </a>
         </li>
-        <li>
-          <a href="{{route('timesheets.create')}}">
+        <li class="treeview">
+          <a href="#">
             <i class="fa fa-th"></i> <span>Timesheets</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
           </a>
+          <ul class="treeview-menu">
+            <li><a href="{{route('timesheets', ['userId'=>Auth::id()])}}"><i class="fa fa-circle-o"></i> Detail</a></li>
+            <li><a href="{{route('timesheets.create')}}"><i class="fa fa-circle-o"></i>Create new</a></li>
+          </ul>
         </li>
         <li>
           <a href="#">

@@ -8,9 +8,11 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\ProjectMemberRepositoryInterface;
 use App\Repositories\Contracts\TimesheetRepositoryInterface;
 use App\Repositories\Contracts\TaskRepositoryInterface;
-
 use Auth;
 use Carbon\Carbon;
+use Charts;
+use Config;
+
 class TimesheetController extends Controller
 {
 	public $projectRepository;
@@ -35,9 +37,67 @@ class TimesheetController extends Controller
   	$this->projectMemberRepository = $projectMemberRepository;
   	$this->taskRepository = $taskRepository;
   }
-  public function index()
+  public function index($userId, Request $request)
   {
-  	return $this->taskRepository->getAll();
+  	if (!(Auth::user()->isLeader())) {
+  		$userTimeSheet = Auth::id();
+  	} else {
+  		$userTimeSheet = $userId;
+  	}
+  	$labelsChart = [];
+  	$valuesChart = [];
+  	$week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  	$colorsChart = [];
+  	if ($request->input('followBy'))
+  		$followBy = $request->input('followBy');
+		else
+			$followBy = Config::get('constants.timesheetBy.week');
+  	if ($followBy == Config::get('constants.timesheetBy.week')) {
+  		$timesheets = $this->timesheetRepository->getTimesheet($userTimeSheet, Config::get('constants.timesheetBy.week'))->get();
+  		foreach ($timesheets as $timesheet) {
+	  		array_push($valuesChart, $timesheet->duration);
+	  		if ($timesheet->duration <= 7) {
+	  			array_push($colorsChart, '#00a65a');
+	  		}	elseif ($timesheet->duration > 7 && $timesheet->duration < 9) {
+	  			array_push($colorsChart, '#319df3');
+	  		} elseif ($timesheet->duration >= 9 && $timesheet->duration < 11 ) {
+	  			array_push($colorsChart, '#f39c12');
+	  		} elseif ($timesheet->duration >= 11 ) {
+	  			array_push($colorsChart, '#dd4b39');
+	  		}
+	  	}
+	  	$chart = Charts::create('bar', 'highcharts')
+	      ->title("Timesheets")
+	      ->dimensions(0, 400) // Width x Height
+	      ->colors($colorsChart)
+	      ->labels($week)
+	      ->values($valuesChart)
+	      ->elementLabel('duration');
+  	}
+  	if ($followBy == Config::get('constants.timesheetBy.month')) {
+  		$timesheets = $this->timesheetRepository->getTimesheet($userTimeSheet, Config::get('constants.timesheetBy.month'))->get();
+  		foreach ($timesheets as $timesheet) {
+	  		array_push($labelsChart, $timesheet->created_at->day);
+	  		array_push($valuesChart, $timesheet->duration);
+	  		if ($timesheet->duration <= 7) {
+	  			array_push($colorsChart, '#00a65a');
+	  		}	elseif ($timesheet->duration > 7 && $timesheet->duration < 9) {
+	  			array_push($colorsChart, '#319df3');
+	  		} elseif ($timesheet->duration >= 9 && $timesheet->duration < 11 ) {
+	  			array_push($colorsChart, '#f39c12');
+	  		} elseif ($timesheet->duration >= 11 ) {
+	  			array_push($colorsChart, '#dd4b39');
+	  		}
+	  	}
+	  	$chart = Charts::create('bar', 'highcharts')
+	      ->title("Timesheets")
+	      ->dimensions(0, 400) // Width x Height
+	      ->colors($colorsChart)
+	      ->labels($labelsChart)
+	      ->values($valuesChart)
+	      ->elementLabel('duration');
+  	}
+  	return view('timesheets.index', ['chart' => $chart]);
   }
   public function showFormCreate()
   {
@@ -63,14 +123,17 @@ class TimesheetController extends Controller
   		$data['project_id'] = $value;
   		$data['content'] = "content";
   		$timesheet = $this->timesheetRepository->create($data);
+  		$duration = 0;
   		foreach ($request->all() as $rq) {
 	  		if ($rq['project_id'] == $value) {
 	  			$task['timesheet_id'] = $timesheet->id;
 	  			$task['content'] = $rq['content'];
 	  			$task['duration'] = $rq['duration'];
+	  			$duration+=$task['duration'];
 	  			$this->taskRepository->create($task);
 	  		}
 	  	}
+	  	$this->timesheetRepository->update($timesheet->id, ['duration'=>$duration]);
   	}  		
   	$message['status'] =true;
   	return $message;

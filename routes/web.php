@@ -28,7 +28,7 @@ Route::prefix('projects')->group(function () {
 	Route::post('/{id}', 'ProjectController@update')->name('projects.update');
 });
 Route::prefix('timesheets')->group(function () {
-	Route::get('/', 'TimesheetController@index')->name('timesheets');
+	Route::get('/user/{userId}', 'TimesheetController@index')->name('timesheets');
 	Route::get('/new', 'TimesheetController@showFormCreate')->name('timesheets.create');
 	Route::post('/new', 'TimesheetController@create')->name('timesheets.store');
 
