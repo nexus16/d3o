@@ -44,6 +44,7 @@ class TimesheetController extends Controller
   	} else {
   		$userTimeSheet = $userId;
   	}
+  	//chart timesheet of user follow week or month
   	$labelsChart = [];
   	$valuesChart = [];
   	$week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -97,10 +98,22 @@ class TimesheetController extends Controller
 	      ->values($valuesChart)
 	      ->elementLabel('duration');
   	}
-  	return view('timesheets.index', ['chart' => $chart]);
+  	//tasm in day of user
+  	$day = Carbon::now();
+    $tasks = $this->timesheetRepository->getDetailTimesheetOfUser(Auth::id(), $day->year, $day->month, $day->day)->get();
+    if ($request->input('time')) {
+      $year = substr($request->input('time'), 0, 4);
+      $month = substr($request->input('time'), 5, 2);
+      $day = substr($request->input('time'), 8, 2);
+      $tasks = $this->timesheetRepository->getDetailTimesheetOfUser(Auth::id(), $year, $month, $day)->get();
+    }
+  	return view('timesheets.index', compact('chart', 'tasks'));
   }
   public function showFormCreate()
   {
+  	if ($this->timesheetRepository->checkTimesheetRegisted(Auth::id())) {
+  		return redirect()->route('home');
+  	}
   	$projects = $this->projectRepository->getParticipationProjects(Auth::id())->get();
   	return view('timesheets.new', compact('projects'));
   }

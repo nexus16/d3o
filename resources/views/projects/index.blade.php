@@ -11,8 +11,8 @@
         <h4>Name: {{$project->name}}</h4>
         <p>PM: {{$project->manager_name}}</p>
         <p>Customer: {{$project->customer_name}}</p>
-        <p>Start: {{$project->start_date}}</p>
-        <p>Deadline: {{$project->deadline}}</p>
+        <p>Start: {{substr($project->start_date, 0, 10)}}</p>
+        <p>Deadline: {{substr($project->deadline, 0, 10)}}</p>
       </div>
       <a href="{{route('projects.view', $project->id)}}" class="small-box-footer">
         More info <i class="fa fa-arrow-circle-right"></i>

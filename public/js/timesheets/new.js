@@ -27,7 +27,7 @@ $(function(){
 		$(this).closest('.list-group-item').remove();
 	})
 	var data = {};
-	$('form').on('click', '.submit', function(){
+	$('body').on('click', '.btn-confirm', function(){
 		var count = 0;
 		$('.list-group').each(function(){
 			var id = $(this).attr('data-id');
@@ -36,6 +36,15 @@ $(function(){
 				var dataItem = {};
 				var content = $(this).find('input[name = "content-'+id+'[]"]').val();
 				var duration = $(this).find('input[name = "duration-'+id+'[]"]').val();
+				console.log(id);
+				if ((content != null) && (content != '')) {
+					$('#confirm-'+id).find('tbody').append(
+						'<tr>'+
+	            '<td>'+content+'</td>'+
+	            '<td>'+duration+'</td>'+
+	          '</tr>'
+						);
+				}
 				dataItem['project_id'] = id;
 				dataItem['content'] = content;
 				dataItem['duration'] = duration;
@@ -47,8 +56,9 @@ $(function(){
 			});
 		});
 		console.log(JSON.stringify(data));
-
-		var url = $(this).attr('data-url');
+	});
+	$('body').on('click', '.submit', function(){
+		var url = $('form').attr('data-url');
 		$.ajaxSetup({
       headers: {
       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -61,6 +71,7 @@ $(function(){
       dataType: 'json',
       success:function (result) {
         console.log(result);
+        location.reload(); 
       }
     });
 	});

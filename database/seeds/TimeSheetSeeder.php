@@ -12,16 +12,16 @@ class TimeSheetSeeder extends Seeder
     public function run()
     {
       for ($j=2; $j<10; $j++) {
-        for ($i=1; $i<30; $i++) {
+        for ($i=4; $i<8; $i++) {
           App\Models\Timesheet::insert([
-            'user_id'=>$j,
+            'user_id'=>$i,
             'user_name'=>'member1',
-            'project_id'=>1,
+            'project_id'=>2,
             'content'=>'content',
-            'duration'=>rand(8, 10),
-            'created_at'=>Carbon\Carbon::createFromDate(2017, 12, 1)->addDay($i)
+            'duration'=>rand(8, 14),
+            'created_at'=>Carbon\Carbon::now()
           ]);
-        }  
+        } 
       }
     }
 }

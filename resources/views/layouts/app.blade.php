@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="{{asset('css/jquery-jvectormap.css')}}">
       <!-- Date Picker -->
     <link rel="stylesheet" href="{{asset('css/bootstrap-datepicker.min.css')}}">
+    <link rel="stylesheet" href="{{asset('css/bootstrap-timepicker.min.css')}}">
       <!-- Daterange picker -->
     <link rel="stylesheet" href="{{asset('css/daterangepicker.css')}}">
       <!-- bootstrap wysihtml5 - text editor -->

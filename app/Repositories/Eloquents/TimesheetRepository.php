@@ -29,7 +29,7 @@ class TimesheetRepository extends EloquentRepository implements TimesheetReposit
         return $timesheet ? $timesheet : null;
     }
     /**
-     * get timesheets 
+     * get timesheets of user
      */
     public function getTimesheet($userId, $follow)
     {
@@ -44,6 +44,43 @@ class TimesheetRepository extends EloquentRepository implements TimesheetReposit
         }    
         $timesheets->orderBy('created_at');
         return $timesheets ? $timesheets : null;
+    }
+    /**
+     * get timesheet member of project day
+     */
+    public function getTimesheetMemberDay($projectId, $year, $month, $day)
+    {
+        $timesheets = Timesheet::where('project_id', '=', $projectId)
+            ->where('created_at', '>=', Carbon::create($year, $month, $day)->startOfDay())
+            ->where('created_at', '<=', Carbon::create($year, $month, $day)->endOfDay());
+        return $timesheets ? $timesheets : null;
+    }
+    /**
+     * get timesheet member of project week
+     */
+    public function getTimesheetMemberWeek($projectId)
+    {
+        $timesheets = Timesheet::where('project_id', '=', $projectId)
+            ->where('created_at', '>=', Carbon::now()->startOfWeek())
+            ->where('created_at', '<=', Carbon::now()->endOfWeek());
+        return $timesheets ? $timesheets : null;
+    }
+    /**
+     * get detail timesheet
+     */
+    public function getDetailTimesheetOfUser($userId,  $year, $month, $day)
+    {
+        $tasks = Timesheet::leftJoin('tasks', 'tasks.timesheet_id', '=', 'timesheets.id')
+            ->leftJoin('projects', 'timesheets.project_id', '=', 'projects.id')
+            ->select(
+                'tasks.*',
+                'timesheets.duration as sum_duration',
+                'projects.name as project_name'
+            )
+            ->where('timesheets.user_id', '=', $userId)
+            ->where('timesheets.created_at', '>=', Carbon::create($year, $month, $day)->startOfDay())
+            ->where('timesheets.created_at', '<=', Carbon::create($year, $month, $day)->endOfDay());
+        return $tasks ? $tasks : null;
     }
     
 }
